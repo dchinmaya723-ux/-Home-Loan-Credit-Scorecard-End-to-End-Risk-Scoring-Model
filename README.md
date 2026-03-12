@@ -3,7 +3,7 @@
 **Author:** Chinmaya Shakti Prasad Das
 **Tools:** Microsoft Excel · Stata (Logistic Regression)
 **Domain:** Retail Banking · Credit Risk Modelling
-**Focus:** Default Prediction · WoE Binning · Scorecard Development · Model Validation
+**Focus:** Default Prediction · WoE Binning · Scorecard Development · Model Validation · Interactive Dashboard
 
 ---
 
@@ -13,16 +13,16 @@ This project builds a **production-style credit scorecard** for home loan defaul
 
 Starting from raw application data, the project walks through every stage of the credit risk modelling pipeline: exploratory analysis, missing value treatment, Weight of Evidence (WoE) binning, logistic regression via Stata, scorecard scaling, and out-of-sample model validation using a confusion matrix and KS statistic.
 
-The final output is a **point-based scorecard** where each applicant's attributes (loan amount, property value, derogatory history, debt-to-income ratio, etc.) map to a score — lower scores indicate higher default risk.
+The final output is a **point-based scorecard** where each applicant's attributes (loan amount, property value, derogatory history, debt-to-income ratio, etc.) map to a score — lower scores indicate higher default risk. A fully **interactive Excel dashboard** presents all model results in a single-sheet visual interface, including a live scorecard calculator powered by dropdown menus and VLOOKUP formulas.
 
 ---
 
 ## 📂 Project Structure
 
 ```
-Home_Loan_Credit_Scorecard/
+Home-Loan-Credit-Scorecard-Chinmaya-Shakti-Prasad-Das/
 │
-├── Home_Loan_Credit_Scorecard.xlsx    # Complete model workbook (all pipeline stages)
+├── Home_Loan_Credit_Scorecard.xlsx    # Complete model workbook (9 sheets)
 └── README.md                          # Project documentation
 ```
 
@@ -30,14 +30,15 @@ Home_Loan_Credit_Scorecard/
 
 | # | Sheet Name | Purpose |
 |---|---|---|
-| 1 | `Data Dictionary` | Variable definitions, full names, and descriptions |
-| 2 | `Raw Data` | Full dataset (5,962 rows) with missing value % diagnostics |
-| 3 | `Descriptive Statistics` | Distribution stats: mean, median, std dev, skewness, kurtosis per variable |
-| 4 | `WoE Training Data` | 70% training set — WoE bin labels, WoE-encoded features, IV tables per variable |
-| 5 | `Logistic Regression Output` | Stata logit output — coefficients, z-scores, p-values, model fit statistics |
-| 6 | `Scorecard` | Final scorecard — PDO scaling inputs, factor/offset calculations, category point scores |
-| 7 | `Scored Test Data` | 30% out-of-sample scoring — Z-values, predicted probabilities, binary classification |
-| 8 | `KS & Confusion Matrix` | Model validation — KS decile table and confusion matrix with precision/recall/accuracy |
+| 1 | `📊 DASHBOARD` | **Interactive analytics dashboard** — KPI cards, charts, KS curve, confusion matrix, live scorecard calculator, descriptive stats |
+| 2 | `Data Dictionary` | Variable definitions, full names, and descriptions |
+| 3 | `Raw Data` | Full dataset (5,962 rows) with missing value % diagnostics and train/test split flag |
+| 4 | `Descriptive Statistics` | Distribution stats: mean, median, std dev, skewness, kurtosis per variable |
+| 5 | `WoE Training Data` | 70% training set — WoE bin labels, WoE-encoded features, IV tables per variable |
+| 6 | `Logistic Regression Output` | Stata logit output — coefficients, z-scores, p-values, model fit statistics |
+| 7 | `Scorecard` | Final scorecard — PDO scaling inputs, factor/offset calculations, category point scores |
+| 8 | `Scored Test Data` | 30% out-of-sample scoring — Z-values, predicted probabilities, binary classification |
+| 9 | `KS & Confusion Matrix` | Model validation — KS decile table and confusion matrix with precision/recall/accuracy |
 
 ---
 
@@ -71,6 +72,61 @@ Home_Loan_Credit_Scorecard/
 
 ---
 
+## 🖥️ Interactive Excel Dashboard (`📊 DASHBOARD` sheet)
+
+The first sheet of the workbook is a fully self-contained **interactive analytics dashboard** built entirely in Excel using charts, conditional formatting, VLOOKUP formulas, and data validation dropdowns. No macros or VBA are used — the dashboard is compatible with Excel 2016 and later.
+
+### Dashboard Sections
+
+#### Section A — Applicant Profile & Predictor Analysis
+- **KPI Cards (top row):** Total Applicants · Training Set · Test Set · Default Rate
+- **KPI Cards (second row):** KS Statistic · Model Accuracy · Precision · Recall
+- **Chart 1 — Applicants by Job Category:** horizontal bar chart showing applicant volume by occupation type
+- **Chart 2 — Default Rate by Job Category:** default rate (%) per job segment, highlighting which occupations carry higher risk
+- **Chart 3 — Information Value Ranking:** IV bar chart ranking all 9 predictors by total IV; dark navy = Strong (IV > 0.1), mid-blue = Medium (0.02–0.1), grey = Weak (< 0.02)
+
+#### Section B — Model Performance: KS Curve & Regression Coefficients
+- **Chart 4 — KS Separation Curve:** line chart plotting cumulative % of defaults vs cumulative % of solvents across 10 deciles — the visual gap between the two lines at each decile is the KS statistic; the curves cross the maximum separation at Decile 7 (KS = 0.201)
+- **Chart 5 — Regression Coefficients (β):** horizontal bar chart showing the magnitude and direction of each variable's logistic regression coefficient — all negative coefficients mean higher values lower the log-odds of default
+
+#### Section C — Confusion Matrix & KS Decile Table
+- **Colour-coded confusion matrix:** True Positives and True Negatives shown in green, False Positives and False Negatives in red — with model metrics (accuracy, precision, recall) displayed below
+- **Full KS decile table:** all 10 deciles with average probability, default count, solvent count, cumulative percentages, and KS statistic; Decile 7 (max KS) highlighted in amber
+
+#### Section D — Interactive Scorecard Calculator ⭐
+The most interactive part of the dashboard. Select one bin per variable using the **yellow dropdown cells** — the credit score, risk verdict, and estimated default probability all recalculate instantly via VLOOKUP formulas.
+
+| Variable | Dropdown Options | Scorecard Points Range |
+|---|---|---|
+| `LOAN` | LOAN 1 through LOAN 10 (10 bins by loan amount) | 68.6 – 86.1 pts |
+| `DEBTINC` | D1 through D10 (by DTI bracket) | 71.1 – 82.8 pts |
+| `NINQ` | N1 through N4 (by inquiry count) | 74.4 – 74.7 pts |
+| `CLAGE` | C1 through C10 (by credit age in months) | 74.5 – 74.7 pts |
+| `VALUE` | V1 through V10 (by property value) | 74.4 – 74.7 pts |
+| `DEROG` | D1 (no derogatory) / D2 (has derogatory) | 74.5 – 74.6 pts |
+
+**Score output panel:**
+- **Credit Score** — sum of all 6 selected bin scores (updates automatically)
+- **Risk Verdict** — APPROVE / MANUAL REVIEW / HIGH RISK / DECLINE (formula-driven)
+- **Estimated Default Probability** — linear approximation mapping the score to an indicative probability of default
+- **Score Interpretation Guide** — band thresholds for all four risk categories
+
+#### Section E — Variable Descriptive Statistics Summary
+A formatted table covering all 9 predictors with mean, median, standard deviation, skewness, min, max, and valid observation count.
+
+### How to Use the Dashboard
+
+1. Open `Home_Loan_Credit_Scorecard.xlsx` in **Excel 2016 or later**
+2. Navigate to the **📊 DASHBOARD** tab (first sheet)
+3. To use the **Scorecard Calculator** (Section D):
+   - Click the **yellow dropdown cell** under each variable label
+   - Select the bin that matches the applicant's attribute (e.g. if DEBTINC = 38%, select `D7 — 38-40%`)
+   - Repeat for all 6 variables
+   - Read the **Credit Score**, **Risk Verdict**, and **Estimated Default Probability** from the dark panel on the right
+4. All charts and tables are static (pre-populated from model results) and require no interaction — they update only if the underlying data sheets are modified
+
+---
+
 ## 🔬 Methodology
 
 The project follows the standard **retail credit scorecard development pipeline**:
@@ -90,6 +146,19 @@ Each continuous variable was binned into 10 equal-frequency deciles on the train
 - **Information Value (IV)** — `Σ (% Non-event − % Event) × WoE`
 
 WoE values replaced raw variable values across all training observations, transforming all predictors onto a single linear scale suitable for logistic regression.
+
+**IV Summary — Predictor Ranking:**
+
+| Variable | Total IV | Predictive Strength |
+|---|---|---|
+| `LOAN` | 0.1784 | 🔵 Strong |
+| `DEBTINC` | 0.1740 | 🔵 Strong |
+| `NINQ` | 0.0311 | 🟡 Medium |
+| `VALUE` | 0.0280 | 🟡 Medium |
+| `CLAGE` | 0.0253 | 🟡 Medium |
+| `CLNO` | 0.0186 | 🟡 Medium |
+| `YOJ` | 0.0070 | 🔴 Weak |
+| `DELINQ` | 0.0025 | 🔴 Weak |
 
 ### Step 4 — Logistic Regression (Stata)
 A binary logistic regression model was estimated in Stata:
@@ -162,19 +231,19 @@ The scaling formulas derive a **Factor** and **Offset** to convert each WoE-enco
 
 **Maximum KS = 0.201** at Decile 7. Industry benchmark: KS > 0.20 is acceptable for a retail credit scorecard.
 
-### Confusion Matrix — Test Set (`KS & Confusion Matrix` sheet)
+### Confusion Matrix — Train Set (`KS & Confusion Matrix` sheet)
 Default classification threshold set at **p = 0.2403** (Decile 7 cutoff — the point of maximum KS separation).
 
-| | Predicted Default | Predicted Solvent |
+| | Actual Default | Actual Solvent |
 |---|---|---|
-| **Actual Default** | 373 ✅ TP | 518 ❌ FN |
-| **Actual Solvent** | 684 ❌ FP | 2,586 ✅ TN |
+| **Predicted Default** | 408 ✅ TP | 841 ❌ FP |
+| **Predicted Solvent** | 483 ❌ FN | 2,429 ✅ TN |
 
-| Metric | Value |
-|---|---|
-| Accuracy | 71.1% |
-| Precision | 35.3% |
-| Recall | 41.9% |
+| Metric | Value | Formula |
+|---|---|---|
+| Accuracy | 68.2% | (TP + TN) / Total |
+| Precision | 32.7% | TP / (TP + FP) |
+| Recall | 45.8% | TP / (TP + FN) |
 
 The threshold of 0.2403 was selected at the KS-maximising decile, balancing the capture of true defaults against false positives given the class imbalance (~21% base default rate).
 
@@ -182,12 +251,13 @@ The threshold of 0.2403 was selected at the KS-maximising decile, balancing the 
 
 ## 💡 Key Business Insights
 
-- **Debt-to-Income Ratio (`DEBTINC`)** is the single most powerful predictor of home loan default (β = −0.91, p < 0.001). Applicants with high DTI are significantly more likely to default — this aligns with real-world underwriting policy.
+- **Debt-to-Income Ratio (`DEBTINC`)** is the single most powerful predictor of home loan default (β = −0.91, p < 0.001, IV = 0.174). Applicants with high DTI are significantly more likely to default — this aligns with real-world underwriting policy.
 - **Recent Credit Inquiries (`NINQ`)** is the second-strongest signal (β = −0.95, p < 0.001). A high inquiry count indicates either financial distress or aggressive credit-seeking behaviour — both red flags for lending.
 - **Loan Amount and Property Value** are statistically significant and negatively associated with default — larger loans tend to go to higher-quality borrowers or carry better collateral coverage.
 - **Derogatory Reports (`DEROG`)** produced a near-zero coefficient with p = 0.998, contributing no additional explanatory power once other variables are controlled for — likely due to multicollinearity with `DELINQ`.
 - **Years at Job (`YOJ`)** was not statistically significant at the 5% level (p = 0.179), suggesting employment tenure alone is not a strong standalone predictor in this dataset.
 - The scorecard assigns the **lowest point totals (highest risk)** to applicants with small loan amounts, low property values, high DTI, and many recent inquiries — fully consistent with credit underwriting intuition.
+- The **interactive dashboard** allows any user to score a hypothetical applicant in under 60 seconds by selecting bins from dropdown menus — no Stata or formula knowledge required.
 
 ---
 
@@ -195,7 +265,11 @@ The threshold of 0.2403 was selected at the KS-maximising decile, balancing the 
 
 | Tool / Technique | Application |
 |---|---|
-| Microsoft Excel | Data preparation, WoE binning, IV calculation, PDO scaling, scorecard table |
+| Microsoft Excel | Data preparation, WoE binning, IV calculation, PDO scaling, scorecard table, interactive dashboard |
+| Excel Charts | KS curve, job distribution, IV ranking, coefficient magnitude — embedded in dashboard sheet |
+| Excel Data Validation | Dropdown menus in the scorecard calculator (Section D of dashboard) |
+| Excel VLOOKUP + IF | Live scorecard calculator — maps dropdown selections to score points and risk verdicts |
+| Excel Conditional Formatting | KS table colour scale, confusion matrix cell colours |
 | Stata | Binary logistic regression estimation (`logit`) |
 | WoE Transformation | Feature encoding for linear logistic regression input |
 | Information Value (IV) | Variable selection and predictive power ranking |
@@ -205,13 +279,36 @@ The threshold of 0.2403 was selected at the KS-maximising decile, balancing the 
 
 ---
 
-## ▶️ How to Use the Scorecard
+## ▶️ How to Use the Workbook
 
-1. Open the `Scorecard` sheet in `Home_Loan_Credit_Scorecard.xlsx`
+### Option A — Use the Interactive Dashboard
+1. Open `Home_Loan_Credit_Scorecard.xlsx` in Excel 2016 or later
+2. Go to the **📊 DASHBOARD** sheet (first tab)
+3. Scroll to **Section D — Scorecard Calculator**
+4. Click the yellow dropdown under each variable and select the bin matching your applicant
+5. The Credit Score, Risk Verdict, and Estimated Default Probability update automatically
+
+### Option B — Use the Full Scorecard Sheet Manually
+1. Open the `Scorecard` sheet
 2. **Collect applicant data** for all 10 input variables
 3. **Find the applicant's bin** for each variable in the Category column (e.g. if `LOAN = ₹8,500,000` → **LOAN 1 → 86 points**)
 4. **Sum all category points** across the 9 scored variables to get the total credit score
 5. **Apply the cutoff:** Applicants with a predicted default probability above **0.2403** are flagged as high-risk — reject or refer for manual review
+
+### Score Interpretation Guide
+
+| Total Score | Risk Band | Recommended Action |
+|---|---|---|
+| > 470 | 🟢 Low Risk | Approve — Standard Terms |
+| 440 – 470 | 🟡 Medium Risk | Approve — Enhanced Monitoring |
+| 400 – 440 | 🟠 High Risk | Refer for Manual Review |
+| < 400 | 🔴 Very High Risk | Decline Application |
+
+---
+
+## 🔗 Resume Bullet Point
+
+> Built an end-to-end home loan credit scorecard using logistic regression (Stata) and WoE binning in Excel across 5,962 applicants — achieving KS = 0.20 and 68.2% training accuracy; deployed a PDO-scaled point system and an interactive Excel dashboard with a live applicant scoring calculator for credit underwriting decisions.
 
 ---
 
