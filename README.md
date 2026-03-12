@@ -1,3 +1,5 @@
+<img width="2294" height="1183" alt="image" src="https://github.com/user-attachments/assets/7a52a046-9c4b-4319-ad06-5ba84da0b376" />
+
 # 🏠 Home Loan Credit Scorecard — End-to-End Risk Scoring Model
 
 **Author:** Chinmaya Shakti Prasad Das
